@@ -1,10 +1,14 @@
+import os
 import requests
 from flask import render_template
 from flask import jsonify
 from main_app import app
 from utils import get_all_categories
 from settings import NASA_EONET
-from settings import access_id, secret_key
+
+
+access_id = os.environ.get('access_id')
+secret_key = os.environ.get('secret_key')
 
 
 @app.route('/')
