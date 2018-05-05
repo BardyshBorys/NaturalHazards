@@ -1,14 +1,28 @@
 import os
 import requests
+import json
 from flask import render_template
 from flask import jsonify
 from main_app import app
 from utils import get_all_categories
 from settings import NASA_EONET
+from settings import CATEGORIES_COLORS
+from markupsafe import Markup
 
 
 access_id = os.environ.get('access_id')
 secret_key = os.environ.get('secret_key')
+
+
+def _get_categories_id():
+    """
+    Purpose: get all categories and their ids
+    :return:
+    """
+    return {
+        item['title']: item['id']
+        for item in requests.get(NASA_EONET['categories']).json()["categories"]
+    }
 
 
 @app.route('/')
@@ -18,7 +32,9 @@ def index():
         'index.html',
         title='WeatherAlerts',
         client_id=access_id,
-        client_key=secret_key
+        client_key=secret_key,
+        categories=Markup(json.dumps(_get_categories_id())),
+        categories_colors=Markup(json.dumps(CATEGORIES_COLORS))
     )
 
 

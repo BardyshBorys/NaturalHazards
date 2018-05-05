@@ -1,0 +1,10 @@
+
+.circle {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.legend {
+    padding: 6px;
+}
