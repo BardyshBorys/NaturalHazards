@@ -1,17 +1,47 @@
-import os
-import requests
 import json
-from flask import render_template
-from flask import jsonify
-from main_app import app
-from utils import get_all_categories
-from settings import NASA_EONET
-from settings import CATEGORIES_COLORS
-from markupsafe import Markup
+import os
 
+import requests
+from flask import jsonify
+from flask import render_template
+from flask import request
+from markupsafe import Markup
+from geojson import Feature, FeatureCollection
+from main_app import app
+from settings import CATEGORIES_COLORS
+from settings import NASA_EONET
 
 access_id = os.environ.get('access_id')
 secret_key = os.environ.get('secret_key')
+
+
+def _event_to_json_feature(event):
+    feature = Feature(
+        properties={
+            "name": event.get('title', ''),
+            "id": event.get('id', ''),
+            "description": event.get('description', ''),
+            "category": event.get('categories') and event.get('categories')[0].get('title') or '',
+            "source": event.get('sources', '')
+        },
+        geometry=event.get('geometries')[0]
+    )
+    return feature
+
+
+def _form_geojson(data):
+    events = data.get('events')
+    if events and len(events) > 1:
+        feature_collection = {
+            "type": "FeatureCollection",
+            "features": [
+                _event_to_json_feature(event) for event in events
+            ]}
+        return jsonify(FeatureCollection(feature_collection))
+    elif events and len(events) == 1:
+        return jsonify(Feature(_event_to_json_feature(events[0])))
+    else:
+        return jsonify({})
 
 
 def _get_categories_id():
@@ -74,18 +104,12 @@ def get_data_by_event(**kwargs):
 
 
 @app.route('/get_data_by_category', methods=['POST'])
-def get_data_by_category(**kwargs):
+def get_data_by_category():
     """
     Purpose: query the eonet categories api by default get all data by all categories
     :param kwargs:
     :return:
     """
-    if kwargs.get('category_id'):
-        data_query = '&'.join(['%s=%s' % (key, val) for key, val in kwargs.iteritems() if key != 'category_id'])
-        url = '%s/%s?%s' % (NASA_EONET['categories'], kwargs.get('category_id'), data_query)
-        return jsonify(requests.get(url).json())
-    else:
-        categories = get_all_categories()
-        return jsonify({
-            key: requests.get(value['link']).json() for key, value in categories.iteritems()
-        })
+    data_query = '&'.join(['%s=%s' % (key, val) for key, val in request.form.iteritems() if key != 'category_id'])
+    url = '%s/%s?%s' % (NASA_EONET['categories'], request.form.get('category_id'), data_query)
+    return _form_geojson(requests.get(url).json())
