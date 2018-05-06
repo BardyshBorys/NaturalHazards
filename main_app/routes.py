@@ -14,6 +14,11 @@ secret_key = os.environ.get('secret_key')
 
 
 def _event_to_json_feature(event):
+    """
+    Purpose to create geojson output from eonet data
+    :param event: dict, with eonet data
+    :return: geojson feature class instance
+    """
     geometry = event.get('geometries')[0]
     geometry['coordinates'] = geometry['coordinates']
     event_date = event.get('geometries')[0].get('date')
@@ -34,6 +39,11 @@ def _event_to_json_feature(event):
 
 
 def _form_geojson(data):
+    """
+    Purpose to
+    :param data:
+    :return:
+    """
     events = data.get('events')
     if events and len(events) > 1:
         feature_collection = [_event_to_json_feature(event) for event in events]
