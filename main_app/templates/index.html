@@ -17,33 +17,35 @@
 <body>
 <div id="map" style="width: 99%; height: 99%; position: absolute"></div>
 <script type="text/javascript">
-    var natural_hazard_catageroies = {{ all_categories|safe }};
-
+    var natural_hazard_catageroies = {{ all_categories | safe }};
 
     var onEachFeature = function (feature, layer) {
-        var customPopup = feature.properties.name + "<br/><img src='http://joshuafrazier.info/images/maptime.gif'"
         var customOptions = {
-        'maxWidth': '500',
-        'className' : 'custom'
-        },
-        innerText = "<strong>" + feature.properties.name + "</strong>";
+                'maxWidth': '500',
+                'className': 'custom'
+            },
+            innerText = "<strong>" +
+                feature.properties.name +
+                "</strong>" + '<br>' +
+                feature.properties.date + '<br>' +
+                "<a href='" + (feature.properties.source.length ? feature.properties.source[0]['url'] : '')+
+                "'>source</a>" + '<br>'
+        ;
         layer.bindPopup(
-            innerText, options=customOptions
+            innerText, options = customOptions
         );
     };
 
-    var natural_hazard_json_layers = function (){
+    var natural_hazard_json_layers = function () {
         var layers = {};
 
         for (var key in natural_hazard_catageroies) {
-            layers[key] =  L.geoJSON(natural_hazard_catageroies[key], {
+            layers[key] = L.geoJSON(natural_hazard_catageroies[key], {
                 pointToLayer: function (feature, latlng) {
-                        return L.marker(latlng, {icon: markers_icons[key]});
-                    },
-                    onEachFeature: onEachFeature
-                }).bindPopup(function (layer) {
-                    return layer.feature.properties.name;
-                })
+                    return L.marker(latlng, {icon: markers_icons[key]});
+                },
+                onEachFeature: onEachFeature
+            });
         }
         return layers
     }();
@@ -103,10 +105,6 @@
             zoom: 7,
             layers: [osmLayer]
         });
-    map.addControl(L.control.groupedLayers(baseMaps, groupedOverlays));
-
-
-
 
     // generate legend
     var legend = L.control({position: 'bottomleft'});
@@ -129,6 +127,7 @@
         return div;
     };
     legend.addTo(map);
+    map.addControl(L.control.groupedLayers(baseMaps, groupedOverlays));
 </script>
 </body>
 </html>
