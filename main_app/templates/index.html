@@ -6,48 +6,50 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/leaflet.css') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/libs/leaflet.groupedlayercontrol.css') }}"/>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}"/>
+
     <script src="{{ url_for('static', filename='js/libs/leaflet.js') }}"></script>
     <script src="{{ url_for('static', filename='js/libs/jquery-core.js') }}"></script>
     <script src="{{ url_for('static', filename='js/libs/jquery-ui.js') }}"></script>
     <script src="{{ url_for('static', filename='js/libs/leaflet.groupedlayercontrol.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/custom_markers.js') }}"></script>
 
 </head>
 <body>
-<div id="map" style="width: 100%; height: 100%; position: absolute"></div>
+<div id="map" style="width: 99%; height: 99%; position: absolute"></div>
 <script type="text/javascript">
-    // var myIcon = L.icon({
-    //     iconUrl: 'leaflet-marker-icon leaflet-zoom-animated leaflet-clickabl',
-    //     iconSize: [32, 37],
-    //     iconAnchor: [16, 37],
-    //     popupAnchor: [0, -28]
-    // });
-
-    function onEachFeature(feature, layer) {
-        layer.bindPopup(feature.properties.name);
-    }
-
-    var showCategory = function (geoJson) {
-
-        L.geoJSON(geoJson, {
-            pointToLayer: function (feature, latlng) {
-                return L.marker(latlng);
-            },
-            onEachFeature: onEachFeature
-        }).addTo(map);
-    };
-    var getCategory = function (id) {
-        var data = {'category_id': id};
-        $.post("/get_data_by_category", data = data, function (response_data, status) {
-            showCategory(response_data)
-        });
-    };
-
-    var natural_hazard_catageroies = {{ categories|safe }};
+    var natural_hazard_catageroies = {{ all_categories|safe }};
     var natural_hazard_catageroies_colors = {{ categories_colors|safe }};
-    var showLegend = function (input_object) {
-        data = getCategory(input_object.id);
 
+
+    var onEachFeature = function (feature, layer) {
+        var customPopup = feature.properties.name + "<br/><img src='http://joshuafrazier.info/images/maptime.gif'"
+        var customOptions = {
+        'maxWidth': '500',
+        'className' : 'custom'
+        },
+        innerText = "<strong>" + feature.properties.name + "</strong>";
+        layer.bindPopup(
+            innerText, options=customOptions
+        );
     };
+
+    var natural_hazard_json_layers = function (){
+        var layers = {};
+
+        for (var key in natural_hazard_catageroies) {
+            layers[key] =  L.geoJSON(natural_hazard_catageroies[key], {
+                pointToLayer: function (feature, latlng) {
+                        return L.marker(latlng, {icon: markers_icons[key]});
+                    },
+                    onEachFeature: onEachFeature
+                }).bindPopup(function (layer) {
+                    return layer.feature.properties.name;
+                })
+        }
+        return layers
+    }();
+
+
     var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         osmAttribution =
             'Map data <a target="_blank" href="http://www.openstreetmap.org">OpenStreetMap.org</a> contributors, ' +
@@ -94,7 +96,8 @@
                 "Fire Radar last 48 hours": fires_viirs_48,
                 "Fire Radar last 72 hours": fires_viirs_72,
                 "Fire Radar last 7 days": fires_viirs_7,
-            }
+            },
+            "Natural Hazard categories": natural_hazard_json_layers
         },
         map = new L.Map('map', {
             center: new L.LatLng(40.7, -73.9),
@@ -102,6 +105,9 @@
             layers: [osmLayer]
         });
     map.addControl(L.control.groupedLayers(baseMaps, groupedOverlays));
+
+
+
 
     // generate legend
     var legend = L.control({position: 'bottomleft'});
@@ -112,14 +118,10 @@
             categories = Object.keys(natural_hazard_catageroies);
 
         for (var i = 0; i < categories.length; i++) {
-
+            var url = markers_icons[categories[i]].options.iconUrl;
             div.innerHTML += labels.push(
-                '<input type="checkbox" class="leaflet-control-layers-selector" id="' +
-                natural_hazard_catageroies[categories[i]] +
-                '" onchange="showLegend(this)">' +
-                '<i class="circle" style="background:' +
-                natural_hazard_catageroies_colors[categories[i]] +
-                '"></i> ' +
+                '<i class="circle" style="background-image: url(' +
+                url + ')"></i> ' +
                 (categories[i] ? categories[i] : '+')
             );
 
@@ -128,7 +130,6 @@
         return div;
     };
     legend.addTo(map);
-
 </script>
 </body>
 </html>

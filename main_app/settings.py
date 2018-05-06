@@ -5,6 +5,11 @@ NASA_EONET = {
     'layers': 'https://eonet.sci.gsfc.nasa.gov/api/v2.1/layers',
 }
 
+CATEGORIES = [
+    'Volcanoes', 'Floods', 'Snow', 'Landslides', 'Dust and Haze', 'Temperature Extremes',
+    'Earthquakes', 'Wildfires', 'Sea and Lake Ice', 'Manmade', 'Severe Storms', 'Drought', 'Water Color'
+]
+
 CATEGORIES_COLORS = {
     'Drought': "#0AF470",
     'Dust and Haze': '#3E04CB',
@@ -20,3 +25,5 @@ CATEGORIES_COLORS = {
     'Water Color': '#2CAFE1',
     'Wildfires': '#A22440'
 }
+
+DAY_LIMIT = 1000
