@@ -7,7 +7,7 @@ from geojson import Feature, FeatureCollection
 from markupsafe import Markup
 
 from main_app import app
-from settings import CATEGORIES_COLORS, NASA_EONET, CATEGORIES, DAY_LIMIT
+from settings import NASA_EONET, CATEGORIES, DAY_LIMIT
 
 access_id = os.environ.get('access_id')
 secret_key = os.environ.get('secret_key')
@@ -74,6 +74,5 @@ def index():
         title='WeatherAlerts',
         client_id=access_id,
         client_key=secret_key,
-        all_categories=Markup(json.dumps(categories)),
-        categories_colors=Markup(json.dumps(CATEGORIES_COLORS))
+        all_categories=Markup(json.dumps(categories))
     )
