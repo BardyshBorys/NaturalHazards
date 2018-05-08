@@ -1,4 +1,4 @@
-var markers_icons = function () {
+var eonet_markers_icons = function () {
     return {
         'Wildfires': L.icon({
             iconUrl: '/static/img/natural_hazard_icons/Wildfires.png',
@@ -50,6 +50,56 @@ var markers_icons = function () {
         }),
         'Earthquakes': L.icon({
             iconUrl: '/static/img/natural_hazard_icons/Earthquakes.png',
+            iconSize: [40, 40],
+        })
+    };
+
+}();
+
+var rsoe_edis_markers_icons = function () {
+    return {
+        'airport_status': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/airplane.png',
+            iconSize: [40, 40]
+        }),
+        'earthquakes': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/Earthquakes.png',
+            iconSize: [40, 40],
+        }),
+        'event_report': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/danger.png',
+            iconSize: [40, 40],
+        }),
+        'extreme_weather': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/SevereStorms.png',
+            iconSize: [40, 40],
+        }),
+        'geomagnetic_storm': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/magnet.png',
+            iconSize: [40, 40],
+        }),
+        'situation_update': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/location-mark.png',
+            iconSize: [40, 40],
+        }),
+        'solar_flare': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/sun.png',
+            iconSize: [40, 40],
+        }),
+        'tropical_storm': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/storm.png',
+            iconSize: [40, 40],
+        }),
+        'tsunami_alert': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/tsunami.png',
+            iconSize: [40, 40],
+        }),
+        'us_npp': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/power-station.png',
+            iconSize: [40, 40],
+        }),
+        'volcano_report': L.icon({
+            iconUrl: '/static/img/natural_hazard_icons/Volcanoes.png',
             iconSize: [40, 40],
         })
     };

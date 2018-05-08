@@ -17,117 +17,162 @@
 <body>
 <div id="map" style="width: 99%; height: 99%; position: absolute"></div>
 <script type="text/javascript">
-    var natural_hazard_catageroies = {{ all_categories | safe }};
+    var eonet_natural_hazard_catageroies = {{ eonet_categories | safe }};
+    var rsoe_edis_natural_hazard_catageroies = {{ rsoe_edis_categories | safe }};
 
-    var onEachFeature = function (feature, layer) {
-        var customOptions = {
-                'maxWidth': '500',
-                'className': 'custom'
-            },
-            innerText = "<strong>" +
-                feature.properties.name +
-                "</strong>" + '<br>' +
-                feature.properties.date + '<br>' +
-                "<a href='" + (feature.properties.source.length ? feature.properties.source[0]['url'] : '')+
-                "'>source</a>" + '<br>'
-        ;
-        layer.bindPopup(
-            innerText, options = customOptions
-        );
-    };
-
-    var natural_hazard_json_layers = function () {
-        var layers = {};
-
-        for (var key in natural_hazard_catageroies) {
-            layers[key] = L.geoJSON(natural_hazard_catageroies[key], {
-                pointToLayer: function (feature, latlng) {
-                    return L.marker(latlng, {icon: markers_icons[key]});
-                },
-                onEachFeature: onEachFeature
-            });
-        }
-        return layers
-    }();
-
-
-    var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-        osmAttribution =
-            'Map data <a target="_blank" href="http://www.openstreetmap.org">OpenStreetMap.org</a> contributors, ' +
-            '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-        osmLayer = new L.TileLayer(osmUrl, {
-            maxZoom: 18,
-            transparent: true,
-            attribution: osmAttribution
-        }),
-        baseMaps = {
-            "OpenStreetMap": osmLayer
-        },
-
-        fires_viirs_24 = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/?", {
-            layers: 'fires_viirs_24',
-            format: 'image/png',
-            transparent: true,
-            attribution: "'NASA FIRMS WMS Service'"
-        }),
-
-        fires_viirs_48 = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/?", {
-            layers: 'fires_viirs_48',
-            format: 'image/png',
-            transparent: true,
-            attribution: "'NASA FIRMS WMS Service'"
-        }),
-
-        fires_viirs_72 = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/?", {
-            layers: 'fires_viirs_72',
-            format: 'image/png',
-            transparent: true,
-            attribution: "'NASA FIRMS WMS Service'"
-        }),
-
-        fires_viirs_7 = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/?", {
-            layers: 'fires_viirs_7',
-            format: 'image/png',
-            transparent: true,
-            attribution: "'NASA FIRMS WMS Service'"
-        }),
-        groupedOverlays = {
-            "VIIRS Fire/Hotspot": {
-                "Fire Radar last 24 hours": fires_viirs_24,
-                "Fire Radar last 48 hours": fires_viirs_48,
-                "Fire Radar last 72 hours": fires_viirs_72,
-                "Fire Radar last 7 days": fires_viirs_7,
-            },
-            "Natural Hazard categories": natural_hazard_json_layers
-        },
+    var mainMap = function () {
+        var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            osmAttribution =
+                'Map data <a target="_blank" href="http://www.openstreetmap.org">OpenStreetMap.org</a> contributors, ' +
+                '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            osmLayer = new L.TileLayer(osmUrl, {
+                maxZoom: 18,
+                transparent: true,
+                attribution: osmAttribution
+            }),
+            baseMaps = {
+                "OpenStreetMap": osmLayer
+            };
         map = new L.Map('map', {
             center: new L.LatLng(40.7, -73.9),
             zoom: 7,
             layers: [osmLayer]
         });
-
-    // generate legend
-    var legend = L.control({position: 'bottomleft'});
-    legend.onAdd = function (map) {
-
-        var div = L.DomUtil.create('div', 'leaflet-control-layers leaflet-control info legend'),
-            labels = ['<strong>Categories</strong>'],
-            categories = Object.keys(natural_hazard_catageroies);
-
-        for (var i = 0; i < categories.length; i++) {
-            var url = markers_icons[categories[i]].options.iconUrl;
-            div.innerHTML += labels.push(
-                '<i class="circle" style="background-image: url(' +
-                url + ')"></i> ' +
-                (categories[i] ? categories[i] : '+')
-            );
-
+        return {
+            map: map,
+            baseMaps: baseMaps
         }
-        div.innerHTML = labels.join('<br>');
-        return div;
-    };
-    legend.addTo(map);
-    map.addControl(L.control.groupedLayers(baseMaps, groupedOverlays));
+    }();
+
+    var overlayMaps = function () {
+        var eonetOnEachFeature = function (feature, layer) {
+            var customOptions = {
+                    'maxWidth': '500',
+                    'className': 'custom'
+                },
+                innerText = "<strong>" +
+                    feature.properties.name +
+                    "</strong>" + '<br>' +
+                    feature.properties.date + '<br>' +
+                    "<a href='" + (feature.properties.source.length ? feature.properties.source[0]['url'] : '') +
+                    "'>source</a>" + '<br>'
+            ;
+            layer.bindPopup(
+                innerText, options = customOptions
+            );
+        };
+        var rsoeEdisOnEachFeature = function (feature, layer) {
+            var customOptions = {
+                    'maxWidth': '500',
+                    'className': 'custom'
+                },
+                innerText = "<strong>" +
+                    feature.properties.name +
+                    "</strong>" + '<br>' //+
+                    // feature.properties.date + '<br>' +
+                    // "<a href='" + (feature.properties.source.length ? feature.properties.source[0]['url'] : '') +
+                    // "'>source</a>" + '<br>'
+            ;
+            layer.bindPopup(
+                innerText, options = customOptions
+            );
+        };
+        var eonet_natural_hazard_json_layers = function () {
+            var layers = {};
+
+            for (var key in eonet_natural_hazard_catageroies) {
+                layers[key] = L.geoJSON(eonet_natural_hazard_catageroies[key], {
+                    pointToLayer: function (feature, latlng) {
+                        return L.marker(latlng, {icon: eonet_markers_icons[key]});
+                    },
+                    onEachFeature: eonetOnEachFeature
+                });
+            }
+            return layers
+        }();
+
+        var rsoe_edis_natural_hazard_json_layers = function () {
+            var layers = {};
+
+            for (var key in rsoe_edis_natural_hazard_catageroies) {
+                layers[key] = L.geoJSON(rsoe_edis_natural_hazard_catageroies[key], {
+                    pointToLayer: function (feature, latlng) {
+                        return L.marker(latlng, {icon: rsoe_edis_markers_icons[key]});
+                    },
+                    onEachFeature: rsoeEdisOnEachFeature
+                });
+            }
+            return layers
+        }();
+
+        var fires_viirs_24 = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/?", {
+                layers: 'fires_viirs_24',
+                format: 'image/png',
+                transparent: true,
+                attribution: "'NASA FIRMS WMS Service'"
+            }),
+
+            fires_viirs_48 = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/?", {
+                layers: 'fires_viirs_48',
+                format: 'image/png',
+                transparent: true,
+                attribution: "'NASA FIRMS WMS Service'"
+            }),
+
+            fires_viirs_72 = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/?", {
+                layers: 'fires_viirs_72',
+                format: 'image/png',
+                transparent: true,
+                attribution: "'NASA FIRMS WMS Service'"
+            }),
+
+            fires_viirs_7 = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/?", {
+                layers: 'fires_viirs_7',
+                format: 'image/png',
+                transparent: true,
+                attribution: "'NASA FIRMS WMS Service'"
+            }),
+            groupedOverlays = {
+                "VIIRS Fire/Hotspot": {
+                    "Fire Radar last 24 hours": fires_viirs_24,
+                    "Fire Radar last 48 hours": fires_viirs_48,
+                    "Fire Radar last 72 hours": fires_viirs_72,
+                    "Fire Radar last 7 days": fires_viirs_7,
+                },
+                "EONET Natural Hazard Categories": eonet_natural_hazard_json_layers,
+                "RSOE EDIS Natural Hazard Categories": rsoe_edis_natural_hazard_json_layers
+            };
+        return {
+            groupedOverlays: groupedOverlays
+        }
+    }();
+
+    var generateLegend = function () {
+        var legend = L.control({position: 'bottomleft'});
+
+        legend.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'leaflet-control-layers leaflet-control info legend'),
+                labels = ['<strong>Categories</strong>'],
+                categories = Object.keys(eonet_natural_hazard_catageroies);
+            for (var i = 0; i < categories.length; i++) {
+                var url = eonet_markers_icons[categories[i]].options.iconUrl;
+                div.innerHTML += labels.push(
+                    '<i class="circle" style="background-image: url(' +
+                    url + ')"></i> ' +
+                    (categories[i] ? categories[i] : '+')
+                );
+            }
+            div.innerHTML = labels.join('<br>');
+            return div;
+        };
+        return {
+            legend: legend
+        }
+    }();
+
+    generateLegend.legend.addTo(mainMap.map);
+    mainMap.map.addControl(L.control.groupedLayers(mainMap.baseMaps, overlayMaps.groupedOverlays));
+
 </script>
 </body>
 </html>
