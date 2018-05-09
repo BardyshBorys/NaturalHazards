@@ -19,7 +19,7 @@ class Factory(object):
 class EONET(object):
 
     @property
-    @cache.cached(timeout=60, key_prefix='eonet_api_call')
+    @cache.cached(timeout=1360, key_prefix='eonet_api_call')
     def categories(self):
         return {
             name: self._get_data_by_category(_id)
@@ -93,7 +93,7 @@ class EONET(object):
 class RSOE_EDIS(object):
 
     @property
-    @cache.cached(timeout=60, key_prefix='rsoe_edis_api_call')
+    @cache.cached(timeout=1360, key_prefix='rsoe_edis_api_call')
     def categories(self):
         rsoe_edis_categories = sorted(RSOE_EDIS_CATEGORIES.keys())
         return {

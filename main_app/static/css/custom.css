@@ -5,7 +5,15 @@
     width: 2em;
     border-radius: 50%;
     display: inline-block;
+    background-color: #22222224;
 }
 .legend {
     padding: 6px;
+    max-height: 46em;
+    overflow: AUTO;
+}
+.popup-info {
+    padding: 6px;
+    max-width: 46em;
+    overflow: AUTO;
 }

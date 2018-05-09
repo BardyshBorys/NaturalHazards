@@ -17,11 +17,11 @@
 <body>
 <div id="map" style="width: 99%; height: 99%; position: absolute"></div>
 <script type="text/javascript">
-    var eonet_natural_hazard_catageroies = {{ eonet_categories | safe }};
-    var rsoe_edis_natural_hazard_catageroies = {{ rsoe_edis_categories | safe }};
+    let eonet_natural_hazard_catageroies = {{ eonet_categories | safe }};
+    let rsoe_edis_natural_hazard_catageroies = {{ rsoe_edis_categories | safe }};
 
-    var mainMap = function () {
-        var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    let mainMap = function () {
+        let osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             osmAttribution =
                 'Map data <a target="_blank" href="http://www.openstreetmap.org">OpenStreetMap.org</a> contributors, ' +
                 '<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
@@ -44,9 +44,9 @@
         }
     }();
 
-    var overlayMaps = function () {
-        var eonetOnEachFeature = function (feature, layer) {
-            var customOptions = {
+    let overlayMaps = function () {
+        let eonetOnEachFeature = function (feature, layer) {
+            let customOptions = {
                     'maxWidth': '500',
                     'className': 'custom'
                 },
@@ -61,26 +61,20 @@
                 innerText, options = customOptions
             );
         };
-        var rsoeEdisOnEachFeature = function (feature, layer) {
-            var customOptions = {
+        let rsoeEdisOnEachFeature = function (feature, layer) {
+            let customOptions = {
                     'maxWidth': '500',
                     'className': 'custom'
                 },
-                innerText = "<strong>" +
-                    feature.properties.name +
-                    "</strong>" + '<br>' //+
-                    // feature.properties.date + '<br>' +
-                    // "<a href='" + (feature.properties.source.length ? feature.properties.source[0]['url'] : '') +
-                    // "'>source</a>" + '<br>'
-            ;
+                innerText = '<div class="popup-info"><pre>' + JSON.stringify(feature.properties, null,'\t') + '</pre></div>';
             layer.bindPopup(
                 innerText, options = customOptions
             );
         };
-        var eonet_natural_hazard_json_layers = function () {
-            var layers = {};
+        let eonet_natural_hazard_json_layers = function () {
+            let layers = {};
 
-            for (var key in eonet_natural_hazard_catageroies) {
+            for (let key in eonet_natural_hazard_catageroies) {
                 layers[key] = L.geoJSON(eonet_natural_hazard_catageroies[key], {
                     pointToLayer: function (feature, latlng) {
                         return L.marker(latlng, {icon: eonet_markers_icons[key]});
@@ -91,10 +85,10 @@
             return layers
         }();
 
-        var rsoe_edis_natural_hazard_json_layers = function () {
-            var layers = {};
+        let rsoe_edis_natural_hazard_json_layers = function () {
+            let layers = {};
 
-            for (var key in rsoe_edis_natural_hazard_catageroies) {
+            for (let key in rsoe_edis_natural_hazard_catageroies) {
                 layers[key] = L.geoJSON(rsoe_edis_natural_hazard_catageroies[key], {
                     pointToLayer: function (feature, latlng) {
                         return L.marker(latlng, {icon: rsoe_edis_markers_icons[key]});
@@ -105,7 +99,7 @@
             return layers
         }();
 
-        var fires_viirs_24 = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/?", {
+        let fires_viirs_24 = L.tileLayer.wms("https://firms.modaps.eosdis.nasa.gov/wms/?", {
                 layers: 'fires_viirs_24',
                 format: 'image/png',
                 transparent: true,
@@ -147,22 +141,40 @@
         }
     }();
 
-    var generateLegend = function () {
-        var legend = L.control({position: 'bottomleft'});
+    let generateLegend = function () {
+        let legend = L.control({position: 'bottomleft'});
 
-        legend.onAdd = function (map) {
-            var div = L.DomUtil.create('div', 'leaflet-control-layers leaflet-control info legend'),
-                labels = ['<strong>Categories</strong>'],
+        let get_eonet_labels = function () {
+            let labels = ['<strong>EONET Categories</strong>'],
                 categories = Object.keys(eonet_natural_hazard_catageroies);
-            for (var i = 0; i < categories.length; i++) {
-                var url = eonet_markers_icons[categories[i]].options.iconUrl;
-                div.innerHTML += labels.push(
+            for (let i = 0; i < categories.length; i++) {
+                let url = eonet_markers_icons[categories[i]].options.iconUrl;
+                labels.push(
                     '<i class="circle" style="background-image: url(' +
                     url + ')"></i> ' +
                     (categories[i] ? categories[i] : '+')
                 );
             }
-            div.innerHTML = labels.join('<br>');
+            return labels
+        };
+        let get_rsoe_edis_labels = function () {
+            let labels = ['<strong>RSOE EDIS Categories</strong>'],
+                categories = Object.keys(rsoe_edis_natural_hazard_catageroies);
+            for (let i = 0; i < categories.length; i++) {
+                let url = rsoe_edis_markers_icons[categories[i]].options.iconUrl;
+                labels.push(
+                    '<i class="circle" style="background-image: url(' +
+                    url + ')"></i> ' +
+                    (categories[i] ? categories[i] : '+')
+                );
+            }
+            return labels
+        };
+        legend.onAdd = function (map) {
+            let div = L.DomUtil.create('div', 'leaflet-control-layers leaflet-control info legend'),
+                eonet_labels = get_eonet_labels(),
+                rsoe_edis_labels = get_rsoe_edis_labels();
+            div.innerHTML += eonet_labels.concat(rsoe_edis_labels).join('<br>');
             return div;
         };
         return {
